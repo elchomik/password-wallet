@@ -43,7 +43,7 @@ public class UserService implements UserDetailsService {
         this.pepper=pepper;
     }
 
-    public User createUser(final UserDTO userDTO) throws Exception {
+    public User createUser(final UserDTO userDTO) {
         final String salt = generateRandomSaltForNewRegisterUser();
         userPassword= userDTO.getPassword();
         final String passwordToHash= salt+ pepper+userPassword;
@@ -105,7 +105,7 @@ public class UserService implements UserDetailsService {
 
     public UserProjection findUserByLogin(final String login){
         final UserDetails userDetails =loadUserByUsername(login);
-        if(userDetails.getAuthorities().equals(UserRoles.UNAUTHENTICATED_USER.name())){
+        if(Objects.equals(userDetails.getAuthorities(), UserRoles.UNAUTHENTICATED_USER.name())){
             return new UserProjection(userDetails, "");
         }
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser) userDetails;

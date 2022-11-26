@@ -20,14 +20,14 @@ public class SHA512Algorithm {
             final BigInteger signumRepresentation = new BigInteger(1, messageDigest);
 
             //convert message digest into hex value
-            String hashText= signumRepresentation.toString(16);
+            StringBuilder hashText= new StringBuilder(signumRepresentation.toString(16));
 
             //Add preceding 0s to make it 32bits
             while(hashText.length()<32){
-                hashText= "0"+hashText;
+                hashText.insert(0, "0");
             }
 
-            return hashText;
+            return hashText.toString();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
 
 import static com.example.wallet.services.UserService.userPassword;
 
@@ -64,9 +64,7 @@ public class PasswordService {
             return decryptedPasswords;
         }
         final List<PasswordProjection> encryptedProjection = new ArrayList<>();
-        allPasswordsByUserId.forEach(password -> {
-            encryptedProjection.add(new PasswordProjection(password.getPasswordId(), password.getWebAddress()));
-        });
+        allPasswordsByUserId.forEach(password -> encryptedProjection.add(new PasswordProjection(password.getPasswordId(), password.getWebAddress())));
 
         return encryptedProjection;
     }

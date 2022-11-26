@@ -28,21 +28,13 @@ import javax.sql.DataSource;
 public class SecurityConfig{
 
     private final UserService userService;
-    private final RestAuthenticationFailureHandler restAuthenticationFailureHandler;
-    private final RestAuthenticationSuccessHandler restAuthenticationSuccessHandler;
-    private final ObjectMapper objectMapper;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final String secret;
 
     public SecurityConfig(final UserService userService,
-                          final RestAuthenticationFailureHandler restAuthenticationFailureHandler,
-                          final RestAuthenticationSuccessHandler restAuthenticationSuccessHandler,
-                          final ObjectMapper objectMapper, AuthenticationConfiguration authenticationConfiguration,
+                          final AuthenticationConfiguration authenticationConfiguration,
                           final @Value("${jwt.secret}") String secret) {
         this.userService = userService;
-        this.restAuthenticationFailureHandler = restAuthenticationFailureHandler;
-        this.restAuthenticationSuccessHandler = restAuthenticationSuccessHandler;
-        this.objectMapper = objectMapper;
         this.authenticationConfiguration = authenticationConfiguration;
         this.secret = secret;
     }
@@ -101,12 +93,6 @@ public class SecurityConfig{
     public AuthenticationEntryPoint registerUserEntryPoint(){
         return new LoginUrlAuthenticationEntryPoint("/register");
     }
-    public JsonObjectAuthenticationFilter authenticationFilter() throws Exception{
-        JsonObjectAuthenticationFilter authenticationFilter=new JsonObjectAuthenticationFilter(objectMapper);
-        authenticationFilter.setAuthenticationSuccessHandler(restAuthenticationSuccessHandler);
-        authenticationFilter.setAuthenticationFailureHandler(restAuthenticationFailureHandler);
-        authenticationFilter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
-        authenticationFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/register","POST"));
-        return authenticationFilter;
-    }
+
+
 }
