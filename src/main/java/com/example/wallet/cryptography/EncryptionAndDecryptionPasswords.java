@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class EncryptionAndDecryptionPasswords {
-    private static final String MD5= "MD5";
+    private static final String MD5 = "MD5";
     private static final String AES = "AES";
 
     public static String enrypt(final String data, final Key key, final String algorithm) throws Exception{
