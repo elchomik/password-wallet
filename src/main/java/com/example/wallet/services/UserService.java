@@ -80,8 +80,8 @@ public class UserService implements UserDetailsService {
         final Integer userId = authenticatedUser.getAuthenitactedUserData().getUserId();
         final String login = authenticatedUser.getUsername();
         final String salt = generateRandomSaltForNewRegisterUser();
-        userPassword= updateMasterPasswordDTO.getPassword();
-        final String passwordToHash= salt+ pepper+userPassword;
+        userPassword = updateMasterPasswordDTO.getPassword();
+        final String passwordToHash = salt+ pepper+userPassword;
         final boolean passwordKeptAsHash = authenticatedUser.getAuthenitactedUserData().isPasswordKeptAsHash();
         if(passwordKeptAsHash && updateMasterPasswordDTO.getHashAlgorithm().equals(SHA512)){
             final String hashPassword = SHA512Algorithm.calculateSHA512(passwordToHash);
@@ -104,7 +104,7 @@ public class UserService implements UserDetailsService {
     }
 
     public UserProjection findUserByLogin(final String login){
-        final UserDetails userDetails =loadUserByUsername(login);
+        final UserDetails userDetails = loadUserByUsername(login);
         if(Objects.equals(userDetails.getAuthorities(), UserRoles.UNAUTHENTICATED_USER.name())){
             return new UserProjection(userDetails, "");
         }
