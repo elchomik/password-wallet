@@ -1,6 +1,6 @@
 package com.example.wallet.services;
 
-import com.example.wallet.readonly.Password;
+
 import com.example.wallet.readonly.PasswordProjection;
 import com.example.wallet.readonly.User;
 import com.example.wallet.repositories.PasswordRepository;
@@ -8,16 +8,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-
-import javax.crypto.spec.SecretKeySpec;
-import java.awt.*;
-import java.security.Key;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +65,6 @@ public class PasswordServiceTest {
     void shouldUpdatePasswords() throws Exception {
         //GIVEN
         final User user= mock(User.class);
-        final Password password = mock(Password.class);
         final List<PasswordProjection> passwordProjections = List.of(new PasswordProjection(1, "passwd1"),
                 new PasswordProjection(1, "passwd2"));
 
