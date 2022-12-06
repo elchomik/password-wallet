@@ -34,7 +34,7 @@ public class UserController {
                                                final Authentication authentication) throws Exception {
         final UserProjection userProjection = (UserProjection) authentication.getPrincipal();
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser) userProjection.getUser();
-        List<PasswordProjection> allPasswords = passwordService.getAllPasswords(authenticatedUser.getAuthenitactedUserData().getUserId(), true);
+        final List<PasswordProjection> allPasswords = passwordService.getAllPasswords(authenticatedUser.getAuthenitactedUserData().getUserId(), true);
         final User user = userService.updatedPassword(authenticatedUser, updateMasterPasswordDTO);
         if(Objects.isNull(user.getUserId())){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

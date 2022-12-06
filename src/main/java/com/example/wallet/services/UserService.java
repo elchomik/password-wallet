@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.wallet.cryptography.HMACAlgorithm;
 import com.example.wallet.cryptography.SHA512Algorithm;
-import com.example.wallet.privilleges.roles.UserRoles;
 import com.example.wallet.readonly.AuthenticatedUser;
 import com.example.wallet.readonly.UnAuthenticatedUser;
 import com.example.wallet.readonly.User;
@@ -18,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -43,24 +43,38 @@ public class UserService implements UserDetailsService {
         this.pepper=pepper;
     }
 
-    public User createUser(final UserDTO userDTO) {
+    public User createUser(final UserDTO userDTO, final String remoteAddress) {
         final String salt = generateRandomSaltForNewRegisterUser();
-        userPassword= userDTO.getPassword();
-        final String passwordToHash= salt+ pepper+userPassword;
+        userPassword = userDTO.getPassword();
+        final String passwordToHash= salt + pepper + userPassword;
+
         if(userDTO.isPasswordKeptAsHash()){
-            return saveUserHashPassword(userDTO,userDTO.getHashAlgorithm(),salt,passwordToHash);
+            return saveUserHashPassword(userDTO,userDTO.getHashAlgorithm(),salt,passwordToHash, remoteAddress);
         }
-        return userRepository.save(new User(userDTO.getLogin(),userDTO.getPassword(),"",false));
+
+        final User userToSave = getUserToSave(userDTO.getLogin(),"",salt,false,remoteAddress);
+        return userRepository.save(userToSave);
     }
 
     private User saveUserHashPassword(final UserDTO userDTO, final String hashAlgorithm,final String salt,
-                                      final String passwordToHash){
+                                      final String passwordToHash, final String remoteAddress){
         if(hashAlgorithm.equals(SHA512)){
             final String hashPassword = SHA512Algorithm.calculateSHA512(passwordToHash);
-            return userRepository.save(new User(userDTO.getLogin(),hashPassword,salt,true));
+            final User userToSave = getUserToSave(userDTO.getLogin(),hashPassword,salt,true,remoteAddress);
+            return userRepository.save(userToSave);
         }
         final String hashPassword = HMACAlgorithm.calculateHMAC(passwordToHash,userPassword);
-        return userRepository.save(new User(userDTO.getLogin(), hashPassword, salt, true));
+        final User userToSave = getUserToSave(userDTO.getLogin(),hashPassword,salt,true,remoteAddress);
+        return userRepository.save(userToSave);
+    }
+
+    private User getUserToSave(final String login, final String password, final String salt,
+                               final boolean isPasswordKeptAsHash, final String remoteAddress){
+        final User userToSave = new User(login, password, salt,isPasswordKeptAsHash);
+        userToSave.setIpAddress(remoteAddress);
+        userToSave.setLoginSuccessful(true);
+        userToSave.setLoginTime(LocalDateTime.now());
+        return userToSave;
     }
 
     private String generateRandomSaltForNewRegisterUser(){
@@ -103,14 +117,23 @@ public class UserService implements UserDetailsService {
        return new AuthenticatedUser(user);
     }
 
-    public UserProjection findUserByLogin(final String login){
+    public UserProjection findUserByLogin(final String login, final String remoteAddress){
         final UserDetails userDetails = loadUserByUsername(login);
-        if(Objects.equals(userDetails.getAuthorities(), UserRoles.UNAUTHENTICATED_USER.name())){
+        if(!userDetails.isEnabled()){
             return new UserProjection(userDetails, "");
         }
         final AuthenticatedUser authenticatedUser = (AuthenticatedUser) userDetails;
-        final String userToken = getUserToken(authenticatedUser);
-        return new UserProjection(userDetails, userToken);
+        final User user = updateUserData(authenticatedUser.getAuthenitactedUserData(), remoteAddress);
+        userRepository.save(user);
+        final String userToken = getUserToken(new AuthenticatedUser(user));
+        return new UserProjection(new AuthenticatedUser(user), userToken);
+    }
+
+    private User updateUserData(final User authenticatedUserData, final String remoteAddress) {
+        authenticatedUserData.setLoginTime(LocalDateTime.now());
+        authenticatedUserData.setLoginSuccessful(true);
+        authenticatedUserData.setIpAddress(remoteAddress);
+        return authenticatedUserData;
     }
 
     private String getUserToken(final AuthenticatedUser authenticatedUser){
