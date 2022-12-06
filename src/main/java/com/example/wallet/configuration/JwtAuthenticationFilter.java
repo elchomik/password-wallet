@@ -54,7 +54,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     .verify(token.replace(TOKEN_PREFIX, ""))
                     .getSubject();
             if (userName != null) {
-                UserProjection authenticatedUserPriniciple = getAuthenticatedUserPriniciple(userService, userName);
+                final UserProjection authenticatedUserPriniciple = getAuthenticatedUserPriniciple(userService,
+                        userName, request.getRemoteAddr());
                 return new UsernamePasswordAuthenticationToken(authenticatedUserPriniciple, null,
                         Collections.singletonList(new SimpleGrantedAuthority(UserRoles.AUTHENTICATED_USER.name())));
             }
@@ -62,8 +63,9 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         return null;
     }
 
-    private UserProjection getAuthenticatedUserPriniciple(final UserService userService, final String userName) {
-        return userService.findUserByLogin(userName);
+    private UserProjection getAuthenticatedUserPriniciple(final UserService userService, final String userName,
+                                                          final String remoteAddress) {
+        return userService.findUserByLogin(userName, remoteAddress);
     }
 
     @Override
