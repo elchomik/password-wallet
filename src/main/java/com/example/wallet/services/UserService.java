@@ -4,10 +4,10 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.wallet.cryptography.HMACAlgorithm;
 import com.example.wallet.cryptography.SHA512Algorithm;
-import com.example.wallet.readonly.AuthenticatedUser;
-import com.example.wallet.readonly.UnAuthenticatedUser;
-import com.example.wallet.readonly.User;
-import com.example.wallet.readonly.UserProjection;
+import com.example.wallet.readmodel.readonly.AuthenticatedUser;
+import com.example.wallet.readmodel.readonly.UnAuthenticatedUser;
+import com.example.wallet.readmodel.readonly.User;
+import com.example.wallet.readmodel.readonly.UserVO;
 import com.example.wallet.repositories.UserRepository;
 import com.example.wallet.webui.UpdateMasterPasswordDTO;
 import com.example.wallet.webui.UserDTO;
@@ -17,7 +17,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -32,7 +31,6 @@ public class UserService implements UserDetailsService {
     private final String pepper;
 
     public static String userPassword;
-
     public UserService(final UserRepository userRepository,
                        final @Value("${jwt.expirationTime}") long expirationTime,
                        final @Value("${jwt.secret}") String secret,
@@ -40,41 +38,46 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
         this.expirationTime = expirationTime;
         this.secret = secret;
-        this.pepper=pepper;
+        this.pepper = pepper;
     }
 
-    public User createUser(final UserDTO userDTO, final String remoteAddress) {
+    public User createUser(final UserDTO userDTO) {
         final String salt = generateRandomSaltForNewRegisterUser();
         userPassword = userDTO.getPassword();
-        final String passwordToHash= salt + pepper + userPassword;
+        final String passwordToHash= salt + pepper + userDTO.getPassword();
 
         if(userDTO.isPasswordKeptAsHash()){
-            return saveUserHashPassword(userDTO,userDTO.getHashAlgorithm(),salt,passwordToHash, remoteAddress);
+            return saveUserHashPassword(userDTO,userDTO.getHashAlgorithm(),salt,passwordToHash);
         }
 
-        final User userToSave = getUserToSave(userDTO.getLogin(),"",salt,false,remoteAddress);
+        final User userToSave = getUserToSave(userDTO.getLogin(),userDTO.getPassword(),salt,false);
         return userRepository.save(userToSave);
     }
 
+
     private User saveUserHashPassword(final UserDTO userDTO, final String hashAlgorithm,final String salt,
-                                      final String passwordToHash, final String remoteAddress){
-        if(hashAlgorithm.equals(SHA512)){
-            final String hashPassword = SHA512Algorithm.calculateSHA512(passwordToHash);
-            final User userToSave = getUserToSave(userDTO.getLogin(),hashPassword,salt,true,remoteAddress);
-            return userRepository.save(userToSave);
-        }
-        final String hashPassword = HMACAlgorithm.calculateHMAC(passwordToHash,userPassword);
-        final User userToSave = getUserToSave(userDTO.getLogin(),hashPassword,salt,true,remoteAddress);
+                                      final String passwordToHash){
+        final String hashPassword = getHashPassword(hashAlgorithm, passwordToHash);
+        final User userToSave = getUserToSave(userDTO.getLogin(),hashPassword,salt,true);
         return userRepository.save(userToSave);
+    }
+
+    private String getHashPassword(final String hashAlgortihm, final String passwordToHash) {
+        if(hashAlgortihm.equals(SHA512)){
+            return SHA512Algorithm.calculateSHA512(passwordToHash);
+        }
+        return HMACAlgorithm.calculateHMAC(passwordToHash, userPassword);
+    }
+
+    public String verifyPasswordHash(final String hashAlgorithm, final String password, final String salt){
+        final String passwordToHash = salt + pepper +password;
+        userPassword = password;
+        return getHashPassword(hashAlgorithm, passwordToHash);
     }
 
     private User getUserToSave(final String login, final String password, final String salt,
-                               final boolean isPasswordKeptAsHash, final String remoteAddress){
-        final User userToSave = new User(login, password, salt,isPasswordKeptAsHash);
-        userToSave.setIpAddress(remoteAddress);
-        userToSave.setLoginSuccessful(true);
-        userToSave.setLoginTime(LocalDateTime.now());
-        return userToSave;
+                               final boolean isPasswordKeptAsHash){
+        return new User(login, password, salt,isPasswordKeptAsHash);
     }
 
     private String generateRandomSaltForNewRegisterUser(){
@@ -117,24 +120,17 @@ public class UserService implements UserDetailsService {
        return new AuthenticatedUser(user);
     }
 
-    public UserProjection findUserByLogin(final String login, final String remoteAddress){
+    public UserVO findUserByLogin(final String login){
         final UserDetails userDetails = loadUserByUsername(login);
         if(!userDetails.isEnabled()){
-            return new UserProjection(userDetails, "");
+            return new UserVO(userDetails, "", "");
         }
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) userDetails;
-        final User user = updateUserData(authenticatedUser.getAuthenitactedUserData(), remoteAddress);
-        userRepository.save(user);
-        final String userToken = getUserToken(new AuthenticatedUser(user));
-        return new UserProjection(new AuthenticatedUser(user), userToken);
+        if (!(userDetails instanceof final AuthenticatedUser authenticatedUser)) throw new AssertionError();
+        final String saltForUser = authenticatedUser.getAuthenitactedUserData().getSalt();
+        final String userToken = getUserToken(authenticatedUser);
+        return new UserVO(authenticatedUser, userToken, saltForUser);
     }
 
-    private User updateUserData(final User authenticatedUserData, final String remoteAddress) {
-        authenticatedUserData.setLoginTime(LocalDateTime.now());
-        authenticatedUserData.setLoginSuccessful(true);
-        authenticatedUserData.setIpAddress(remoteAddress);
-        return authenticatedUserData;
-    }
 
     private String getUserToken(final AuthenticatedUser authenticatedUser){
         final String login = authenticatedUser.getAuthenitactedUserData().getLogin();

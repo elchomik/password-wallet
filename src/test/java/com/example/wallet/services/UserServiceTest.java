@@ -30,7 +30,6 @@ public class UserServiceTest {
     private static final boolean IS_PASSWORD_KEPT_AS_HASH = true;
     private static final String HASH_ALGORITHM = "SHA-512";
     private static final String pepper = "abcd1243";
-    private static final String IP_ADDRESS = "0.0.0.1";
 
     public static String USER_PASSWORD;
 
@@ -77,7 +76,7 @@ public class UserServiceTest {
                 userToSave.getPasswordHash(), userToSave.getSalt(),userToSave.isPasswordKeptAsHash());
         AuthenticatedUser authenticatedUser = new AuthenticatedUser(savedUser);
 
-        lenient().when(userService.findUserByLogin(LOGIN, IP_ADDRESS))
+        lenient().when(userService.findUserByLogin(LOGIN))
                 .thenReturn(new UserVO(authenticatedUser, anyString(), anyString()));
         lenient().when(userRepository.findUserByLogin(LOGIN)).thenReturn(savedUser);
         Mockito.inOrder(userService, userRepository);
@@ -90,7 +89,7 @@ public class UserServiceTest {
     void shouldNotFindUserByLogin() {
         //Given
         final UnAuthenticatedUser unAuthenticatedUser = new UnAuthenticatedUser();
-        lenient().when(userService.findUserByLogin(LOGIN,""))
+        lenient().when(userService.findUserByLogin(LOGIN))
                 .thenReturn(new UserVO(unAuthenticatedUser, "", ""));
         assertNull(unAuthenticatedUser.getUsername());
 
