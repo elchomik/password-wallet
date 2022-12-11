@@ -1,10 +1,10 @@
 package com.example.wallet.services;
 
 import com.example.wallet.cryptography.SHA512Algorithm;
-import com.example.wallet.readonly.AuthenticatedUser;
-import com.example.wallet.readonly.UnAuthenticatedUser;
-import com.example.wallet.readonly.User;
-import com.example.wallet.readonly.UserProjection;
+import com.example.wallet.readmodel.readonly.AuthenticatedUser;
+import com.example.wallet.readmodel.readonly.UnAuthenticatedUser;
+import com.example.wallet.readmodel.readonly.User;
+import com.example.wallet.readmodel.readonly.UserVO;
 import com.example.wallet.repositories.UserRepository;
 import com.example.wallet.webui.UserDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ public class UserServiceTest {
                 userToSave.getPasswordHash(), userToSave.getSalt(),userToSave.isPasswordKeptAsHash());
 
         //WHEN
-        lenient().when(userService.createUser(testUser, IP_ADDRESS)).thenReturn(userToSave);
+        lenient().when(userService.createUser(testUser)).thenReturn(userToSave);
         lenient().when(userRepository.save(userToSave)).thenReturn(savedUser);
         Mockito.inOrder(userService, userRepository);
         assertEquals(1, savedUser.getUserId());
@@ -78,7 +78,7 @@ public class UserServiceTest {
         AuthenticatedUser authenticatedUser = new AuthenticatedUser(savedUser);
 
         lenient().when(userService.findUserByLogin(LOGIN, IP_ADDRESS))
-                .thenReturn(new UserProjection(authenticatedUser, anyString()));
+                .thenReturn(new UserVO(authenticatedUser, anyString(), anyString()));
         lenient().when(userRepository.findUserByLogin(LOGIN)).thenReturn(savedUser);
         Mockito.inOrder(userService, userRepository);
 
@@ -91,7 +91,7 @@ public class UserServiceTest {
         //Given
         final UnAuthenticatedUser unAuthenticatedUser = new UnAuthenticatedUser();
         lenient().when(userService.findUserByLogin(LOGIN,""))
-                .thenReturn(new UserProjection(unAuthenticatedUser, ""));
+                .thenReturn(new UserVO(unAuthenticatedUser, "", ""));
         assertNull(unAuthenticatedUser.getUsername());
 
     }
