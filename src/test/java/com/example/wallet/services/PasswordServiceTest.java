@@ -1,8 +1,8 @@
 package com.example.wallet.services;
 
 
-import com.example.wallet.readonly.PasswordProjection;
-import com.example.wallet.readonly.User;
+import com.example.wallet.readmodel.readonly.PasswordProjection;
+import com.example.wallet.readmodel.readonly.User;
 import com.example.wallet.repositories.PasswordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

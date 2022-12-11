@@ -1,8 +1,7 @@
-package com.example.wallet.readonly;
+package com.example.wallet.readmodel.readonly;
 
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,17 +16,14 @@ public class User{
     private String salt;
     private boolean isPasswordKeptAsHash;
 
-    @Column
-    private boolean isLoginSuccessful;
-
-    @Column
-    private LocalDateTime loginTime;
-    @Column
-    private String ipAddress;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "ipAddressId", insertable = false, updatable = false)
+    private List<IpAddress> ipAddressId;
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "userId",insertable = false,updatable = false)
     private List<Password> passwords;
+
     public User(final String login, final String passwordHash,
                 final String salt, final boolean isPasswordKeptAsHash) {
         this.login = login;
@@ -67,31 +63,11 @@ public class User{
         return isPasswordKeptAsHash;
     }
 
-    public boolean isLoginSuccessful() {
-        return isLoginSuccessful;
-    }
-
-    public LocalDateTime getLoginTime() {
-        return loginTime;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public void setLoginSuccessful(boolean loginSuccessful) {
-        isLoginSuccessful = loginSuccessful;
-    }
-
-    public void setLoginTime(LocalDateTime loginTime) {
-        this.loginTime = loginTime;
-    }
-
-    public void setPasswordHash(final String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
+//    public List<IpAddress> getIpAddressId() {
+//        return ipAddressId;
+//    }
+//
+//    public List<Password> getPasswords() {
+//        return passwords;
+//    }
 }

@@ -3,7 +3,7 @@ package com.example.wallet.configuration;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.wallet.privilleges.roles.UserRoles;
-import com.example.wallet.readonly.UserProjection;
+import com.example.wallet.readmodel.readonly.UserVO;
 import com.example.wallet.services.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,8 +54,8 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     .verify(token.replace(TOKEN_PREFIX, ""))
                     .getSubject();
             if (userName != null) {
-                final UserProjection authenticatedUserPriniciple = getAuthenticatedUserPriniciple(userService,
-                        userName, request.getRemoteAddr());
+                final UserVO authenticatedUserPriniciple = getAuthenticatedUserPriniciple(userService,
+                        userName);
                 return new UsernamePasswordAuthenticationToken(authenticatedUserPriniciple, null,
                         Collections.singletonList(new SimpleGrantedAuthority(UserRoles.AUTHENTICATED_USER.name())));
             }
@@ -63,13 +63,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         return null;
     }
 
-    private UserProjection getAuthenticatedUserPriniciple(final UserService userService, final String userName,
-                                                          final String remoteAddress) {
-        return userService.findUserByLogin(userName, remoteAddress);
+    private UserVO getAuthenticatedUserPriniciple(final UserService userService, final String userName) {
+        return userService.findUserByLogin(userName);
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getRequestURI().equals("/register") ||
                 request.getRequestURI().equals("/loginToApp");
     }

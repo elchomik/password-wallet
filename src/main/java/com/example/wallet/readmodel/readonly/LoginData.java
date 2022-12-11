@@ -1,4 +1,4 @@
-package com.example.wallet.readonly;
+package com.example.wallet.readmodel.readonly;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

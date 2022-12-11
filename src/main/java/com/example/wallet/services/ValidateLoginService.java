@@ -1,6 +1,6 @@
 package com.example.wallet.services;
 
-import com.example.wallet.readonly.LoginData;
+import com.example.wallet.readmodel.readonly.LoginData;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

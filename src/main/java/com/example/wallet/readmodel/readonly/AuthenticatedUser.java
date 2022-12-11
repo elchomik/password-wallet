@@ -1,4 +1,4 @@
-package com.example.wallet.readonly;
+package com.example.wallet.readmodel.readonly;
 
 import com.example.wallet.privilleges.roles.UserRoles;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,49 +9,56 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-public class UnAuthenticatedUser  implements UserDetails {
+public class AuthenticatedUser implements UserDetails {
 
-    public UnAuthenticatedUser() {
+    private final User user;
+
+    public AuthenticatedUser(final User user) {
+        this.user = user;
+    }
+
+    public User getAuthenitactedUserData(){
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.<GrantedAuthority>singletonList(new SimpleGrantedAuthority(UserRoles.UNAUTHENTICATED_USER.name()));
+        return Collections.<GrantedAuthority>singletonList(new SimpleGrantedAuthority(UserRoles.AUTHENTICATED_USER.name()));
     }
 
-    @JsonIgnore
     @Override
+    @JsonIgnore
     public String getPassword() {
-        return null;
+        return user.getPasswordHash();
     }
 
-    @JsonIgnore
     @Override
+    @JsonIgnore
     public String getUsername() {
-        return null;
+        return user.getLogin();
     }
 
-    @JsonIgnore
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
-    @JsonIgnore
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     @JsonIgnore
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     @JsonIgnore
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
