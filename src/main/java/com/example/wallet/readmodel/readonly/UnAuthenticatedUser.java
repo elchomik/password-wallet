@@ -1,4 +1,4 @@
-package com.example.wallet.readonly;
+package com.example.wallet.readmodel.readonly;
 
 import com.example.wallet.privilleges.roles.UserRoles;
 import com.fasterxml.jackson.annotation.JsonIgnore;
