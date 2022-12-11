@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     .getSubject();
             if (userName != null) {
                 final UserVO authenticatedUserPriniciple = getAuthenticatedUserPriniciple(userService,
-                        userName, request.getRemoteAddr());
+                        userName);
                 return new UsernamePasswordAuthenticationToken(authenticatedUserPriniciple, null,
                         Collections.singletonList(new SimpleGrantedAuthority(UserRoles.AUTHENTICATED_USER.name())));
             }
@@ -63,13 +63,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         return null;
     }
 
-    private UserVO getAuthenticatedUserPriniciple(final UserService userService, final String userName,
-                                                  final String remoteAddress) {
-        return userService.findUserByLogin(userName, remoteAddress);
+    private UserVO getAuthenticatedUserPriniciple(final UserService userService, final String userName) {
+        return userService.findUserByLogin(userName);
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getRequestURI().equals("/register") ||
                 request.getRequestURI().equals("/loginToApp");
     }
