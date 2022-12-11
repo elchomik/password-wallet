@@ -67,5 +67,5 @@ public class IpAddress {
     public Integer getUserId() {
         return userId;
     }
-    
+
 }
