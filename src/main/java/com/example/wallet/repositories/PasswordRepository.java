@@ -1,6 +1,6 @@
 package com.example.wallet.repositories;
 
-import com.example.wallet.readonly.Password;
+import com.example.wallet.readmodel.readonly.Password;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

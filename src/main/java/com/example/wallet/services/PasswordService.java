@@ -1,10 +1,10 @@
 package com.example.wallet.services;
 
 import com.example.wallet.cryptography.EncryptionAndDecryptionPasswords;
-import com.example.wallet.readonly.AuthenticatedUser;
-import com.example.wallet.readonly.Password;
-import com.example.wallet.readonly.PasswordProjection;
-import com.example.wallet.readonly.User;
+import com.example.wallet.readmodel.readonly.AuthenticatedUser;
+import com.example.wallet.readmodel.readonly.Password;
+import com.example.wallet.readmodel.readonly.PasswordProjection;
+import com.example.wallet.readmodel.readonly.User;
 import com.example.wallet.repositories.PasswordRepository;
 import com.example.wallet.webui.PasswordDTO;
 import org.springframework.http.HttpStatus;
