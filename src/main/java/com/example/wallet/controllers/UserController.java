@@ -1,10 +1,10 @@
 package com.example.wallet.controllers;
 
 import com.example.wallet.privilleges.roles.IsAuthenticatedUser;
-import com.example.wallet.readonly.AuthenticatedUser;
-import com.example.wallet.readonly.PasswordProjection;
-import com.example.wallet.readonly.User;
-import com.example.wallet.readonly.UserProjection;
+import com.example.wallet.readmodel.readonly.AuthenticatedUser;
+import com.example.wallet.readmodel.readonly.PasswordProjection;
+import com.example.wallet.readmodel.readonly.User;
+import com.example.wallet.readmodel.readonly.UserVO;
 import com.example.wallet.services.PasswordService;
 import com.example.wallet.services.UserService;
 import com.example.wallet.webui.UpdateMasterPasswordDTO;
@@ -32,8 +32,8 @@ public class UserController {
     @IsAuthenticatedUser
     public ResponseEntity<User> changePassword(final @RequestBody UpdateMasterPasswordDTO updateMasterPasswordDTO,
                                                final Authentication authentication) throws Exception {
-        final UserProjection userProjection = (UserProjection) authentication.getPrincipal();
-        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) userProjection.getUser();
+        final UserVO userVO = (UserVO) authentication.getPrincipal();
+        final AuthenticatedUser authenticatedUser = (AuthenticatedUser) userVO.getUser();
         final List<PasswordProjection> allPasswords = passwordService.getAllPasswords(authenticatedUser.getAuthenitactedUserData().getUserId(), true);
         final User user = userService.updatedPassword(authenticatedUser, updateMasterPasswordDTO);
         if(Objects.isNull(user.getUserId())){
